@@ -1,26 +1,17 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Lock, 
-  LogOut, 
-  RefreshCw, 
-  Home,
-  Plus,
-  Minus,
-  Save,
-  AlertCircle,
-  CheckCircle,
-  BarChart3,
-  Clock,
-  Activity
+  Lock, LogOut, RefreshCw, Home, Plus, Minus, 
+  Save, AlertCircle, CheckCircle, BarChart3, 
+  Clock, Activity, Zap, History, ShieldAlert
 } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import Link from 'next/link';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { PRAYER_TYPES, PrayerWithAggregate } from '@/lib/types';
 
-// Simple password check (in production, use proper auth)
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'vitanova2026admin';
 
 export default function AdminPage() {
@@ -31,19 +22,11 @@ export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [adjustments, setAdjustments] = useState<Record<number, number>>({});
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
-  const [recentLogs, setRecentLogs] = useState<Array<{
-    id: string;
-    prayer_name: string;
-    value: number;
-    created_at: string;
-  }>>([]);
+  const [recentLogs, setRecentLogs] = useState<any[]>([]);
 
-  // Check session storage for auth
   useEffect(() => {
     const auth = sessionStorage.getItem('vitanova_admin_auth');
-    if (auth === 'true') {
-      setIsAuthenticated(true);
-    }
+    if (auth === 'true') setIsAuthenticated(true);
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
@@ -53,7 +36,7 @@ export default function AdminPage() {
       sessionStorage.setItem('vitanova_admin_auth', 'true');
       setPasswordError('');
     } else {
-      setPasswordError('Incorrect password');
+      setPasswordError('Invalid Credentials');
     }
   };
 
@@ -64,365 +47,248 @@ export default function AdminPage() {
 
   const fetchData = useCallback(async () => {
     setIsLoading(true);
-    
     if (!isSupabaseConfigured()) {
-      // Demo data
-      setPrayers(PRAYER_TYPES.map(p => ({ ...p, total: Math.floor(Math.random() * 100) + 10 })));
-      setRecentLogs([]);
+      setPrayers(PRAYER_TYPES.map(p => ({ ...p, total: Math.floor(Math.random() * 100) })));
       setIsLoading(false);
       return;
     }
-
     try {
-      // Fetch aggregates
-      const { data: aggregates, error: aggError } = await supabase
-        .from('prayer_aggregates')
-        .select('*');
-
-      if (aggError) throw aggError;
-
-      const prayersWithTotals: PrayerWithAggregate[] = PRAYER_TYPES.map(prayer => {
-        const aggregate = aggregates?.find(a => a.prayer_type_id === prayer.id);
-        return { ...prayer, total: aggregate?.total || 0 };
-      });
-
+      const { data: aggregates } = await supabase.from('prayer_aggregates').select('*');
+      const prayersWithTotals = PRAYER_TYPES.map(prayer => ({
+        ...prayer,
+        total: aggregates?.find(a => a.prayer_type_id === prayer.id)?.total || 0
+      }));
       setPrayers(prayersWithTotals);
 
-      // Fetch recent logs
-      const { data: logs, error: logsError } = await supabase
+      const { data: logs } = await supabase
         .from('prayer_logs')
         .select('id, prayer_type_id, value, created_at')
-        .order('created_at', { ascending: false })
-        .limit(20);
+        .order('created_at', { ascending: false }).limit(10);
 
-      if (logsError) throw logsError;
-
-      const logsWithNames = logs?.map(log => ({
-        id: log.id,
-        prayer_name: PRAYER_TYPES.find(p => p.id === log.prayer_type_id)?.name || 'Unknown',
-        value: log.value,
-        created_at: log.created_at
-      })) || [];
-
-      setRecentLogs(logsWithNames);
-    } catch (err) {
-      console.error('Error fetching admin data:', err);
+      setRecentLogs(logs?.map(log => ({
+        ...log,
+        prayer_name: PRAYER_TYPES.find(p => p.id === log.prayer_type_id)?.name || 'Admin Mod'
+      })) || []);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchData();
-    }
-  }, [isAuthenticated, fetchData]);
+  useEffect(() => { if (isAuthenticated) fetchData(); }, [isAuthenticated, fetchData]);
 
   const handleAdjustment = (prayerId: number, delta: number) => {
-    setAdjustments(prev => ({
-      ...prev,
-      [prayerId]: (prev[prayerId] || 0) + delta
-    }));
+    setAdjustments(prev => ({ ...prev, [prayerId]: (prev[prayerId] || 0) + delta }));
   };
 
   const handleSaveAdjustments = async () => {
-    if (!isSupabaseConfigured()) {
-      setSaveStatus('success');
-      setTimeout(() => setSaveStatus('idle'), 2000);
-      setAdjustments({});
-      return;
-    }
-
     setSaveStatus('saving');
-
     try {
-      const entries = Object.entries(adjustments).filter(([, value]) => value !== 0);
-      
-      for (const [prayerId, value] of entries) {
-        const { error } = await supabase
-          .from('prayer_logs')
-          .insert({
-            prayer_type_id: parseInt(prayerId),
-            value: value,
-            device_hash: 'admin_adjustment'
+      if (isSupabaseConfigured()) {
+        const entries = Object.entries(adjustments).filter(([, v]) => v !== 0);
+        for (const [id, val] of entries) {
+          await supabase.from('prayer_logs').insert({ 
+            prayer_type_id: parseInt(id), 
+            value: val, 
+            device_hash: 'admin_panel' 
           });
-
-        if (error) throw error;
+        }
       }
-
       setSaveStatus('success');
       setAdjustments({});
       fetchData();
       setTimeout(() => setSaveStatus('idle'), 2000);
-    } catch (err) {
-      console.error('Error saving adjustments:', err);
+    } catch {
       setSaveStatus('error');
-      setTimeout(() => setSaveStatus('idle'), 3000);
     }
   };
 
-  const totalPrayers = prayers.reduce((sum, p) => sum + p.total, 0);
-  const totalMinutes = prayers.filter(p => p.unit === 'minutes').reduce((sum, p) => sum + p.total, 0);
-  const hasAdjustments = Object.values(adjustments).some(v => v !== 0);
-
-  // Login screen
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="inline-flex p-4 rounded-full bg-purple-500/20 border border-purple-500/30 mb-4">
-              <Lock className="w-8 h-8 text-purple-400" />
-            </div>
-            <h1 className="text-2xl font-bold text-white mb-2">Admin Access</h1>
-            <p className="text-gray-400 text-sm">Enter password to access the admin panel</p>
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter admin password"
-                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50"
-              />
-              {passwordError && (
-                <p className="mt-2 text-red-400 text-sm flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {passwordError}
-                </p>
-              )}
+      <div className="min-h-screen flex items-center justify-center bg-[#020617] p-6">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-md p-1 rounded-[2.5rem] bg-gradient-to-b from-purple-500/20 to-transparent shadow-2xl"
+        >
+          <div className="bg-slate-900/90 backdrop-blur-xl p-10 rounded-[2.3rem] border border-white/5">
+            <div className="text-center space-y-4 mb-8">
+              <div className="w-20 h-20 bg-purple-500/10 rounded-3xl border border-purple-500/20 flex items-center justify-center mx-auto shadow-inner">
+                <ShieldAlert className="w-10 h-10 text-purple-400" />
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight text-white">Vitanova Command</h1>
+              <p className="text-slate-500 text-sm">Authentication required to manage repository</p>
             </div>
 
-            <button
-              type="submit"
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-purple-500 text-white font-medium hover:from-purple-500 hover:to-purple-400 transition-all"
-            >
-              Access Admin Panel
-            </button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <Link href="/" className="text-gray-400 text-sm hover:text-purple-400 inline-flex items-center gap-1">
-              <Home className="w-4 h-4" />
-              Back to Prayer Repository
-            </Link>
+            <form onSubmit={handleLogin} className="space-y-4">
+              <div className="relative group">
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Admin Token"
+                  className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+                />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-purple-400 transition-colors" size={20} />
+              </div>
+              {passwordError && <p className="text-red-400 text-xs text-center font-medium">{passwordError}</p>}
+              <button type="submit" className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold tracking-widest uppercase text-xs transition-all shadow-lg shadow-purple-500/20">
+                Authorize Access
+              </button>
+            </form>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
-  // Admin dashboard
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="border-b border-white/10 px-4 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-purple-500/20">
-              <BarChart3 className="w-5 h-5 text-purple-400" />
+    <div className="min-h-screen bg-[#020617] text-slate-200">
+      {/* HEADER */}
+      <header className="sticky top-0 z-50 border-b border-white/5 bg-[#020617]/80 backdrop-blur-md px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg">
+              <Zap size={20} className="text-white" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-white">Admin Dashboard</h1>
-              <p className="text-xs text-gray-500">Vitanova 2026 Prayer Repository</p>
+            <div className="hidden sm:block">
+              <h2 className="text-sm font-bold text-white uppercase tracking-widest">Admin Control</h2>
+              <p className="text-[10px] text-slate-500 font-medium">Session: Active</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={fetchData}
-              disabled={isLoading}
-              className="p-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 transition-all"
-            >
-              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <div className="flex items-center gap-3">
+            <button onClick={fetchData} className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/5">
+              <RefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
             </button>
-            <Link
-              href="/"
-              className="p-2 rounded-lg bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:border-white/20 transition-all"
-            >
-              <Home className="w-4 h-4" />
+            <Link href="/" className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 transition-colors border border-white/5">
+              <Home size={18} />
             </Link>
-            <button
-              onClick={handleLogout}
-              className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all"
-            >
-              <LogOut className="w-4 h-4" />
+            <button onClick={handleLogout} className="p-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400">
+              <LogOut size={18} />
             </button>
           </div>
         </div>
       </header>
 
-      {/* Demo mode banner */}
-      {!isSupabaseConfigured() && (
-        <div className="bg-amber-500/20 border-b border-amber-500/30 px-4 py-2 text-center">
-          <p className="text-amber-300 text-sm">
-            🔧 Demo Mode - Changes won&apos;t persist without Supabase configuration
-          </p>
-        </div>
-      )}
+      <main className="max-w-7xl mx-auto px-6 py-12 space-y-12">
+        {/* STATS GRID */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <StatCard title="Total Intercessions" value={prayers.reduce((s, p) => s + p.total, 0)} icon={<Activity size={20}/>} color="purple" />
+          <StatCard title="Consecrated Minutes" value={prayers.filter(p => p.unit === 'minutes').reduce((s, p) => s + p.total, 0)} icon={<Clock size={20}/>} color="amber" />
+          <StatCard title="Prayer Variety" value={`${prayers.filter(p => p.total > 0).length} / ${prayers.length}`} icon={<Zap size={20}/>} color="blue" />
+        </section>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        {/* Stats overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="rounded-2xl bg-gradient-to-br from-purple-900/40 to-purple-800/20 border border-purple-500/20 p-6">
-            <div className="flex items-center gap-2 text-purple-300 mb-2">
-              <Activity className="w-4 h-4" />
-              <span className="text-sm">Total Prayers</span>
+        {/* ADJUSTMENT GRID */}
+        <section>
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <BarChart3 className="text-purple-400" />
+              <h3 className="text-xl font-bold text-white">Prayer Management</h3>
             </div>
-            <p className="text-3xl font-bold text-white">{totalPrayers.toLocaleString()}</p>
-          </div>
-
-          <div className="rounded-2xl bg-gradient-to-br from-amber-900/40 to-amber-800/20 border border-amber-500/20 p-6">
-            <div className="flex items-center gap-2 text-amber-300 mb-2">
-              <Clock className="w-4 h-4" />
-              <span className="text-sm">Total Minutes</span>
-            </div>
-            <p className="text-3xl font-bold text-white">{totalMinutes.toLocaleString()}</p>
-          </div>
-
-          <div className="rounded-2xl bg-gradient-to-br from-green-900/40 to-green-800/20 border border-green-500/20 p-6">
-            <div className="flex items-center gap-2 text-green-300 mb-2">
-              <CheckCircle className="w-4 h-4" />
-              <span className="text-sm">Active Prayer Types</span>
-            </div>
-            <p className="text-3xl font-bold text-white">{prayers.filter(p => p.total > 0).length} / {prayers.length}</p>
-          </div>
-        </div>
-
-        {/* Prayer adjustments */}
-        <section className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-200">Prayer Counters</h2>
-            {hasAdjustments && (
-              <button
-                onClick={handleSaveAdjustments}
-                disabled={saveStatus === 'saving'}
-                className={`
-                  px-4 py-2 rounded-lg font-medium text-sm flex items-center gap-2
-                  ${saveStatus === 'success' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                    saveStatus === 'error' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                    'bg-purple-600 text-white hover:bg-purple-500'}
-                  transition-all
-                `}
-              >
-                {saveStatus === 'saving' ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : saveStatus === 'success' ? (
-                  <>
-                    <CheckCircle className="w-4 h-4" />
-                    Saved!
-                  </>
-                ) : saveStatus === 'error' ? (
-                  <>
-                    <AlertCircle className="w-4 h-4" />
-                    Error
-                  </>
-                ) : (
-                  <>
-                    <Save className="w-4 h-4" />
-                    Save Changes
-                  </>
-                )}
-              </button>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {prayers.map(prayer => {
-              const IconComponent = (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[prayer.icon_name] || Icons.Heart;
-              const adjustment = adjustments[prayer.id] || 0;
-              const newTotal = prayer.total + adjustment;
-
-              return (
-                <div
-                  key={prayer.id}
-                  className={`
-                    rounded-xl bg-white/5 border p-4
-                    ${adjustment !== 0 ? 'border-purple-500/50' : 'border-white/10'}
-                  `}
+            <AnimatePresence>
+              {Object.values(adjustments).some(v => v !== 0) && (
+                <motion.button
+                  initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
+                  onClick={handleSaveAdjustments}
+                  className={`px-6 py-3 rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center gap-3 shadow-xl transition-all ${
+                    saveStatus === 'success' ? 'bg-green-600' : 'bg-purple-600 hover:bg-purple-500'
+                  }`}
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                      <div className={`p-2 rounded-lg ${prayer.unit === 'minutes' ? 'bg-amber-500/20' : 'bg-purple-500/20'}`}>
-                        <IconComponent className={`w-4 h-4 ${prayer.unit === 'minutes' ? 'text-amber-400' : 'text-purple-400'}`} />
-                      </div>
-                      <span className="font-medium text-white">{prayer.name}</span>
+                  {saveStatus === 'saving' ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
+                  {saveStatus === 'success' ? 'Database Updated' : 'Push Adjustments'}
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {prayers.map(prayer => {
+              const IconComp = (Icons as any)[prayer.icon_name] || Icons.Heart;
+              const adj = adjustments[prayer.id] || 0;
+              return (
+                <motion.div 
+                  key={prayer.id}
+                  layout
+                  className={`relative p-6 rounded-3xl border transition-all duration-500 ${adj !== 0 ? 'bg-purple-500/10 border-purple-500/50 shadow-lg shadow-purple-500/10' : 'bg-white/[0.03] border-white/5'}`}
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="p-3 rounded-2xl bg-white/5 border border-white/10 text-slate-300">
+                      <IconComp size={20} />
                     </div>
-                    <span className="text-xs text-gray-500 uppercase">{prayer.unit}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">{prayer.unit}</span>
+                  </div>
+                  
+                  <div className="space-y-1 mb-6">
+                    <h4 className="font-bold text-lg text-white">{prayer.name}</h4>
+                    <p className="text-3xl font-black tracking-tighter text-white">
+                      {(prayer.total + adj).toLocaleString()}
+                    </p>
+                    {adj !== 0 && (
+                      <span className={`text-xs font-bold ${adj > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        {adj > 0 ? '+' : ''}{adj} pending
+                      </span>
+                    )}
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-2xl font-bold text-white">
-                        {newTotal.toLocaleString()}
-                      </p>
-                      {adjustment !== 0 && (
-                        <p className={`text-xs ${adjustment > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {adjustment > 0 ? '+' : ''}{adjustment} adjustment
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => handleAdjustment(prayer.id, prayer.unit === 'minutes' ? -5 : -1)}
-                        className="p-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleAdjustment(prayer.id, prayer.unit === 'minutes' ? 5 : 1)}
-                        className="p-2 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500/20 transition-all"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
+                  <div className="flex gap-2">
+                    <button onClick={() => handleAdjustment(prayer.id, prayer.unit === 'minutes' ? -10 : -1)} className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-red-500/20 text-slate-400 hover:text-red-400 border border-white/5 transition-all">
+                      <Minus size={16} className="mx-auto" />
+                    </button>
+                    <button onClick={() => handleAdjustment(prayer.id, prayer.unit === 'minutes' ? 10 : 1)} className="flex-1 py-3 rounded-xl bg-white/5 hover:bg-green-500/20 text-slate-400 hover:text-green-400 border border-white/5 transition-all">
+                      <Plus size={16} className="mx-auto" />
+                    </button>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
           </div>
         </section>
 
-        {/* Recent activity */}
-        <section>
-          <h2 className="text-lg font-semibold text-gray-200 mb-4">Recent Activity</h2>
-          
-          {recentLogs.length === 0 ? (
-            <div className="rounded-xl bg-white/5 border border-white/10 p-8 text-center">
-              <p className="text-gray-500">No recent activity</p>
-            </div>
-          ) : (
-            <div className="rounded-xl bg-white/5 border border-white/10 overflow-hidden">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Prayer</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Value</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Time</th>
+        {/* LOGS TABLE */}
+        <section className="pb-12">
+          <div className="flex items-center gap-3 mb-8">
+            <History className="text-slate-500" />
+            <h3 className="text-xl font-bold text-white">System Logs</h3>
+          </div>
+          <div className="rounded-[2rem] bg-white/[0.02] border border-white/5 overflow-hidden backdrop-blur-sm">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-white/5 bg-white/[0.02]">
+                  <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-500">Prayer Type</th>
+                  <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-500">Value</th>
+                  <th className="px-8 py-5 text-[10px] font-bold uppercase tracking-widest text-slate-500">Timestamp</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/[0.03]">
+                {recentLogs.map((log) => (
+                  <tr key={log.id} className="hover:bg-white/[0.02] transition-colors">
+                    <td className="px-8 py-4 font-semibold text-slate-200">{log.prayer_name}</td>
+                    <td className="px-8 py-4 text-purple-400 font-mono">+{log.value}</td>
+                    <td className="px-8 py-4 text-slate-500 text-sm">{new Date(log.created_at).toLocaleString()}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {recentLogs.map((log, i) => (
-                    <tr key={log.id} className={i !== recentLogs.length - 1 ? 'border-b border-white/5' : ''}>
-                      <td className="px-4 py-3 text-sm text-white">{log.prayer_name}</td>
-                      <td className="px-4 py-3 text-sm text-gray-300">+{log.value}</td>
-                      <td className="px-4 py-3 text-sm text-gray-500">
-                        {new Date(log.created_at).toLocaleString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       </main>
+    </div>
+  );
+}
+
+function StatCard({ title, value, icon, color }: any) {
+  const colors: any = {
+    purple: "from-purple-500/20 to-purple-900/40 border-purple-500/30 text-purple-400",
+    amber: "from-amber-500/20 to-amber-900/40 border-amber-500/30 text-amber-400",
+    blue: "from-blue-500/20 to-blue-900/40 border-blue-500/30 text-blue-400",
+  };
+  return (
+    <div className={`p-8 rounded-[2rem] bg-gradient-to-br ${colors[color]} border shadow-2xl`}>
+      <div className="flex items-center gap-3 mb-4 opacity-80">
+        {icon}
+        <span className="text-[10px] font-bold uppercase tracking-widest">{title}</span>
+      </div>
+      <p className="text-4xl font-black text-white tracking-tighter">{value.toLocaleString()}</p>
     </div>
   );
 }
