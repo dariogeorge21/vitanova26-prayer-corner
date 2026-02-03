@@ -1,36 +1,131 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vitanova 2026 Prayer Repository
 
-## Getting Started
+A reverent, dark-themed web application to aggregate intercessory prayers for **Vitanova 2026** - a special spiritual program organized by Jesus Youth SJCET.
 
-First, run the development server:
+> *"Where two or three gather in my name, there am I with them."* — Matthew 18:20
+
+![Next.js](https://img.shields.io/badge/Next.js-15-black)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38B2AC)
+![Supabase](https://img.shields.io/badge/Supabase-Database-3ECF8E)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)
+
+## ✨ Features
+
+- **🙏 9 Prayer Types** - Holy Mass, Rosary, Adoration, Word of God, Memorare, Creed, Hail Mary, Way of the Cross, Novena of St. Joseph
+- **⏱️ Time-based Prayers** - +5min and +30min increments for Adoration and Word of God
+- **📊 Live Statistics** - Real-time aggregate counters with beautiful visualizations
+- **🔒 Spam Protection** - 5-second cooldown between submissions per device
+- **🎨 Dark Aesthetic UI** - Deep purples, amber accents, glass-morphism cards
+- **👤 Anonymous** - No user accounts required, focus on collective prayer
+- **🛠️ Admin Panel** - View stats and manually adjust counters
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ 
+- npm or yarn
+- Supabase account (free tier works)
+
+### 1. Clone and Install
+
+```bash
+git clone https://github.com/your-username/vitanova-prayer-corner.git
+cd vitanova-prayer-corner
+npm install
+```
+
+### 2. Set Up Supabase
+
+1. Create a new project at [supabase.com](https://supabase.com)
+2. Go to **SQL Editor** and run the schema from `supabase/schema.sql`
+3. Go to **Project Settings > API** and copy your URL and anon key
+
+### 3. Configure Environment
+
+```bash
+cp .env.local.example .env.local
+```
+
+Edit `.env.local` with your Supabase credentials:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+NEXT_PUBLIC_ADMIN_PASSWORD=your-secure-password
+```
+
+### 4. Run Development Server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the prayer repository.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── app/
+│   ├── page.tsx              # Landing page with prayer cards
+│   ├── admin/page.tsx        # Admin dashboard
+│   ├── layout.tsx            # Root layout with dark theme
+│   └── globals.css           # Tailwind + custom animations
+├── components/
+│   ├── Header.tsx            # Vitanova branding header
+│   ├── CountPrayerCard.tsx   # +1 button prayer card
+│   ├── TimePrayerCard.tsx    # +5min/+30min prayer card
+│   ├── StatsBar.tsx          # Aggregate stats display
+│   └── Footer.tsx            # Footer with admin link
+├── hooks/
+│   ├── usePrayers.ts         # Fetch/subscribe to prayer data
+│   └── useSubmitPrayer.ts    # Submit with cooldown logic
+└── lib/
+    ├── supabase.ts           # Supabase client
+    ├── device.ts             # Device fingerprint for cooldown
+    └── types.ts              # TypeScript interfaces
+```
 
-## Learn More
+## 🗄️ Database Schema
 
-To learn more about Next.js, take a look at the following resources:
+| Table | Description |
+|-------|-------------|
+| `prayer_types` | 9 prayer types with name, unit (count/minutes), icon |
+| `prayer_logs` | Individual submissions with device_hash for rate limiting |
+| `prayer_aggregates` | View providing real-time totals per prayer type |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🚢 Deployment (Vercel)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Push to GitHub
+2. Import project in [Vercel](https://vercel.com)
+3. Add environment variables in Vercel dashboard
+4. Deploy!
 
-## Deploy on Vercel
+## 🎨 Customization
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Add New Prayer Types
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Add to `PRAYER_TYPES` array in `src/lib/types.ts`
+2. Insert into Supabase `prayer_types` table
+3. Use any [Lucide icon](https://lucide.dev/icons) name
+
+### Change Theme Colors
+
+Edit CSS variables in `src/app/globals.css`:
+
+```css
+:root {
+  --primary: #7c3aed;      /* Purple */
+  --accent: #f59e0b;       /* Amber/Gold */
+  --background: #0a0a1a;   /* Deep navy */
+}
+```
+
+## 🙏 About Vitanova
+
+Vitanova is a special three-day program organized by Jesus Youth seniors of SJCET. It is designed to help participants experience Jesus in a fresh, real, and unforgettable way, blending deep spiritual encounters with joyful fellowship, music, activities, and community.
+
+---
+
+Made with ❤️ for Vitanova 2026 | Jesus Youth SJCET
