@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Clock, ShieldCheck, Info } from 'lucide-react';
+import { Clock, ShieldCheck, Info } from 'lucide-react';
 import Header from '@/components/Header';
 import StatsBar from '@/components/StatsBar';
 import CountPrayerCard from '@/components/CountPrayerCard';
@@ -23,7 +23,7 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: { y: 20, opacity: 0 },
-  visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+  visible: { y: 0, opacity: 1, transition: { type: 'spring' as const, stiffness: 300, damping: 24 } }
 };
 
 export default function Home() {
@@ -57,7 +57,7 @@ export default function Home() {
         >
           <p className="text-amber-200 text-xs font-medium flex items-center justify-center gap-2 uppercase tracking-widest">
             <ShieldCheck size={14} className="text-amber-500" />
-            Demo Mode: Local Persistence Only
+            Demo Mode: Local Persistence
           </p>
         </motion.div>
       )}
@@ -195,7 +195,8 @@ export default function Home() {
   );
 }
 
-/** * Refactored Skeleton Loader for better readability
+/**
+ * Refactored Skeleton Loader for better readability
  */
 function SkeletonGrid({ count }: { count: number }) {
   return (
