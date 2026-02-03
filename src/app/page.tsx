@@ -1,6 +1,8 @@
 'use client';
 
 import { useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, Clock, ShieldCheck, Info } from 'lucide-react';
 import Header from '@/components/Header';
 import StatsBar from '@/components/StatsBar';
 import CountPrayerCard from '@/components/CountPrayerCard';
@@ -10,6 +12,20 @@ import { usePrayers } from '@/hooks/usePrayers';
 import { useSubmitPrayer } from '@/hooks/useSubmitPrayer';
 import { isSupabaseConfigured } from '@/lib/supabase';
 
+// Animation variants for staggered list entry
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const itemVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 300, damping: 24 } }
+};
+
 export default function Home() {
   const { prayers, isLoading, updatePrayerLocally } = usePrayers();
   
@@ -17,7 +33,6 @@ export default function Home() {
     onSuccess: updatePrayerLocally
   });
 
-  // Separate prayers by type
   const { countPrayers, timePrayers } = useMemo(() => {
     const countPrayers = prayers.filter(p => p.unit === 'count');
     const timePrayers = prayers.filter(p => p.unit === 'minutes');
@@ -25,175 +40,185 @@ export default function Home() {
   }, [prayers]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950">
+    <div className="relative min-h-screen flex flex-col bg-[#020617] text-slate-50 selection:bg-purple-500/30 overflow-x-hidden">
+      
+      {/* --- AESTHETIC BACKGROUND ELEMENTS --- */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-purple-600/10 blur-[120px] animate-pulse" />
+        <div className="absolute top-[20%] -right-[10%] w-[35%] h-[35%] rounded-full bg-blue-600/10 blur-[120px] animate-pulse [animation-delay:2s]" />
+        <div className="absolute bottom-[10%] left-[20%] w-[30%] h-[30%] rounded-full bg-pink-600/5 blur-[100px]" />
+      </div>
+
       {/* Demo mode banner */}
       {!isSupabaseConfigured() && (
-        <div className="bg-gradient-to-r from-amber-500/10 via-amber-500/20 to-amber-500/10 border-b border-amber-500/20 backdrop-blur-sm px-4 py-3 text-center">
-          <p className="text-amber-200 text-sm font-medium flex items-center justify-center gap-2">
-            <span className="text-base">🔧</span>
-            <span>Demo Mode - Configure Supabase environment variables to enable persistence</span>
+        <motion.div 
+          initial={{ y: -50 }} animate={{ y: 0 }}
+          className="relative z-50 bg-amber-500/10 border-b border-amber-500/20 backdrop-blur-md px-4 py-2 text-center"
+        >
+          <p className="text-amber-200 text-xs font-medium flex items-center justify-center gap-2 uppercase tracking-widest">
+            <ShieldCheck size={14} className="text-amber-500" />
+            Demo Mode: Local Persistence Only
           </p>
-        </div>
+        </motion.div>
       )}
 
-      {/* Header */}
       <Header />
+      
+      <div className="relative z-10">
+        <StatsBar prayers={prayers} isLoading={isLoading} />
+      </div>
 
-      {/* Stats Bar */}
-      <StatsBar prayers={prayers} isLoading={isLoading} />
-
-      {/* Main content */}
-      <main className="flex-1 px-4 py-8 pb-16">
-        <div className="max-w-7xl mx-auto space-y-20">
-          {/* Section: Count-based prayers */}
+      <main className="relative z-10 flex-1 px-4 py-12 md:py-20">
+        <div className="max-w-7xl mx-auto space-y-32">
+          
+          {/* --- SECTION: COUNT PRAYERS --- */}
           <section>
-            {/* Modern section header */}
-            <div className="mb-10">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full blur-md opacity-50" />
-                    <div className="relative w-1.5 h-10 bg-gradient-to-b from-purple-400 via-purple-500 to-pink-500 rounded-full shadow-lg" />
-                  </div>
-                  <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-200 via-purple-300 to-pink-300 bg-clip-text text-transparent tracking-tight">
-                    Prayers & Devotions
-                  </h2>
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-purple-400 font-semibold tracking-[0.2em] uppercase text-xs">
+                  <Sparkles size={16} />
+                  <span>Spiritual Arsenal</span>
                 </div>
+                <h2 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                  Prayers & Devotions
+                </h2>
               </div>
-              <p className="text-gray-300/80 text-sm md:text-base ml-8 font-light">
-                Join us in intercession through these powerful prayers
+              <p className="text-slate-400 max-w-md text-sm md:text-base font-light leading-relaxed">
+                Every prayer offered is a ripple in the spiritual realm. Join thousands in this collective intercession.
               </p>
             </div>
             
-            {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(7)].map((_, i) => (
-                  <div 
-                    key={i} 
-                    className="group relative rounded-3xl bg-gradient-to-br from-white/[0.08] via-white/[0.05] to-transparent border border-white/10 p-8 backdrop-blur-xl shadow-2xl overflow-hidden"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="relative">
-                      <div className="flex items-center gap-4 mb-6">
-                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 shadow-xl animate-pulse" />
-                        <div className="flex-1">
-                          <div className="h-6 w-32 bg-gradient-to-r from-white/20 to-white/5 rounded-xl mb-2.5 animate-pulse" />
-                          <div className="h-3.5 w-24 bg-gradient-to-r from-white/10 to-white/5 rounded-lg animate-pulse" />
-                        </div>
-                      </div>
-                      <div className="h-14 w-28 bg-gradient-to-r from-white/20 to-white/5 rounded-2xl mb-4 animate-pulse" />
-                      <div className="h-4 w-32 bg-gradient-to-r from-white/10 to-white/5 rounded-lg mb-6 animate-pulse" />
-                      <div className="h-16 w-full bg-gradient-to-r from-white/20 to-white/5 rounded-2xl animate-pulse" />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {countPrayers.map(prayer => (
-                  <CountPrayerCard
-                    key={prayer.id}
-                    prayer={prayer}
-                    onSubmit={submitPrayer}
-                    cooldownRemaining={cooldownRemaining}
-                    isSubmitting={isSubmitting}
-                  />
-                ))}
-              </div>
-            )}
+            <AnimatePresence mode="wait">
+              {isLoading ? (
+                <SkeletonGrid count={6} />
+              ) : (
+                <motion.div 
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+                >
+                  {countPrayers.map(prayer => (
+                    <motion.div key={prayer.id} variants={itemVariants}>
+                      <CountPrayerCard
+                        prayer={prayer}
+                        onSubmit={submitPrayer}
+                        cooldownRemaining={cooldownRemaining}
+                        isSubmitting={isSubmitting}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </section>
 
-          {/* Section: Time-based prayers */}
+          {/* --- SECTION: TIME PRAYERS --- */}
           <section>
-            {/* Modern section header */}
-            <div className="mb-10">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-b from-amber-500 to-orange-500 rounded-full blur-md opacity-50" />
-                    <div className="relative w-1.5 h-10 bg-gradient-to-b from-amber-400 via-amber-500 to-orange-500 rounded-full shadow-lg" />
-                  </div>
-                  <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-amber-200 via-amber-300 to-orange-300 bg-clip-text text-transparent tracking-tight">
-                    Time in Prayer
-                  </h2>
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-amber-400 font-semibold tracking-[0.2em] uppercase text-xs">
+                  <Clock size={16} />
+                  <span>Consecrated Moments</span>
                 </div>
+                <h2 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                  Time in Prayer
+                </h2>
               </div>
-              <p className="text-gray-300/80 text-sm md:text-base ml-8 font-light">
-                Dedicate your time in communion with God
-              </p>
             </div>
-            
-            {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {[...Array(2)].map((_, i) => (
-                  <div 
-                    key={i} 
-                    className="group relative rounded-3xl bg-gradient-to-br from-white/[0.08] via-white/[0.05] to-transparent border border-white/10 p-8 backdrop-blur-xl shadow-2xl overflow-hidden"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="relative">
-                      <div className="flex items-center gap-4 mb-6">
-                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-white/20 to-white/5 shadow-xl animate-pulse" />
-                        <div className="flex-1">
-                          <div className="h-6 w-32 bg-gradient-to-r from-white/20 to-white/5 rounded-xl mb-2.5 animate-pulse" />
-                          <div className="h-3.5 w-24 bg-gradient-to-r from-white/10 to-white/5 rounded-lg animate-pulse" />
-                        </div>
-                      </div>
-                      <div className="h-14 w-28 bg-gradient-to-r from-white/20 to-white/5 rounded-2xl mb-4 animate-pulse" />
-                      <div className="h-4 w-32 bg-gradient-to-r from-white/10 to-white/5 rounded-lg mb-6 animate-pulse" />
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="h-16 bg-gradient-to-r from-white/20 to-white/5 rounded-2xl animate-pulse" />
-                        <div className="h-16 bg-gradient-to-r from-white/20 to-white/5 rounded-2xl animate-pulse" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {timePrayers.map(prayer => (
-                  <TimePrayerCard
-                    key={prayer.id}
-                    prayer={prayer}
-                    onSubmit={submitPrayer}
-                    cooldownRemaining={cooldownRemaining}
-                    isSubmitting={isSubmitting}
-                  />
-                ))}
-              </div>
-            )}
+
+            <AnimatePresence mode="wait">
+              {isLoading ? (
+                <SkeletonGrid count={2} />
+              ) : (
+                <motion.div 
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="visible"
+                  className="grid grid-cols-1 lg:grid-cols-2 gap-8"
+                >
+                  {timePrayers.map(prayer => (
+                    <motion.div key={prayer.id} variants={itemVariants}>
+                      <TimePrayerCard
+                        prayer={prayer}
+                        onSubmit={submitPrayer}
+                        cooldownRemaining={cooldownRemaining}
+                        isSubmitting={isSubmitting}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </section>
 
-          {/* Info section */}
-          <section className="max-w-3xl mx-auto text-center py-12">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-purple-500/10 rounded-3xl blur-xl group-hover:blur-2xl transition-all duration-500" />
-              <div className="relative rounded-3xl bg-gradient-to-br from-white/[0.08] via-white/[0.05] to-transparent border border-white/10 backdrop-blur-xl p-10 shadow-2xl">
-                <div className="inline-block mb-6">
-                  <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-200 via-pink-200 to-purple-200 bg-clip-text text-transparent">
-                    About Vitanova 2026
-                  </h3>
-                  <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-purple-400/50 to-transparent mt-2" />
-                </div>
-                <p className="text-gray-300/90 text-base leading-relaxed mb-6 font-light">
-                  Vitanova is a special three-day program organized by Jesus Youth seniors of SJCET. 
-                  It is designed to help participants experience Jesus in a fresh, real, and unforgettable way, 
-                  blending deep spiritual encounters with joyful fellowship, music, activities, and community.
-                </p>
-                <div className="pt-6 border-t border-white/10">
-                  <p className="text-purple-200/80 text-sm leading-relaxed font-light italic">
-                    This prayer repository records and aggregates prayers offered by intercessors 
-                    for the success of this mega spiritual program.
+          {/* --- INFO SECTION --- */}
+          <motion.section 
+            initial={{ opacity: 0, y: 40 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="max-w-4xl mx-auto"
+          >
+            <div className="relative p-1 rounded-[2.5rem] bg-gradient-to-b from-white/10 to-transparent group">
+              <div className="relative rounded-[2.3rem] bg-slate-900/80 backdrop-blur-2xl p-8 md:p-14 overflow-hidden">
+                {/* Subtle internal glow */}
+                <div className="absolute -top-20 -right-20 w-64 h-64 bg-purple-500/10 blur-[80px] rounded-full group-hover:bg-purple-500/20 transition-colors duration-700" />
+                
+                <div className="relative flex flex-col items-center text-center space-y-8">
+                  <div className="p-4 rounded-2xl bg-white/5 border border-white/10 shadow-inner">
+                    <Info className="text-purple-400" size={32} />
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <h3 className="text-3xl font-bold text-white tracking-tight">About Vitanova 2026</h3>
+                    <div className="h-1 w-20 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full" />
+                  </div>
+
+                  <p className="text-slate-300 text-lg leading-relaxed font-light">
+                    Vitanova is a curated three-day encounter organized by <span className="text-white font-medium">Jesus Youth seniors of SJCET</span>. 
+                    It’s more than a program—it’s a spiritual rebirth through music, fellowship, and divine intimacy.
                   </p>
+                  
+                  <div className="pt-8 border-t border-white/5 w-full">
+                    <p className="text-purple-300/60 text-sm italic tracking-wide">
+                      This digital repository unifies our voices in a singular symphony of intercession.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          </section>
+          </motion.section>
         </div>
       </main>
 
-      {/* Footer */}
       <Footer />
+    </div>
+  );
+}
+
+/** * Refactored Skeleton Loader for better readability
+ */
+function SkeletonGrid({ count }: { count: number }) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {[...Array(count)].map((_, i) => (
+        <div 
+          key={i} 
+          className="h-[320px] rounded-[2rem] bg-white/[0.03] border border-white/5 animate-pulse overflow-hidden"
+        >
+          <div className="p-8 space-y-6">
+            <div className="flex gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-white/5" />
+              <div className="space-y-2 flex-1 pt-2">
+                <div className="h-4 w-3/4 bg-white/10 rounded" />
+                <div className="h-3 w-1/2 bg-white/5 rounded" />
+              </div>
+            </div>
+            <div className="h-20 w-full bg-white/5 rounded-2xl" />
+            <div className="h-12 w-full bg-white/10 rounded-xl" />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
