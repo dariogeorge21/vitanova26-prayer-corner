@@ -76,7 +76,6 @@ export default function Home() {
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-purple-400 font-semibold tracking-[0.2em] uppercase text-xs">
-                  <Sparkles size={16} />
                   <span>Spiritual Arsenal</span>
                 </div>
                 <h2 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
