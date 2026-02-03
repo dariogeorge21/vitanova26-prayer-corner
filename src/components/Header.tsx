@@ -38,9 +38,9 @@ export default function Header() {
         
         {/* Decorative line */}
         <div className="mt-8 flex items-center justify-center gap-4">
-          <div className="h-px w-16 bg-gradient-to-r from-transparent to-purple-500/50" />
+          <div className="h-px w-16 bg-linear-to-r from-transparent to-purple-500/50" />
           <div className="w-2 h-2 rounded-full bg-amber-400/60" />
-          <div className="h-px w-16 bg-gradient-to-l from-transparent to-purple-500/50" />
+          <div className="h-px w-16 bg-linear-to-l from-transparent to-purple-500/50" />
         </div>
       </div>
     </header>
