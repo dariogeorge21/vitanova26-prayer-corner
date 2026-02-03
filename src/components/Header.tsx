@@ -1,6 +1,6 @@
 'use client';
 
-import { Cross } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Header() {
   return (
@@ -11,17 +11,12 @@ export default function Header() {
       </div>
       
       <div className="relative z-10">
-        {/* Cross icon */}
+        {/* Logo */}
         <div className="flex justify-center mb-4">
-          <div className="float-animation p-4 rounded-full bg-gradient-to-br from-purple-500/20 to-amber-500/20 border border-white/10">
-            <Cross className="w-10 h-10 text-amber-400" />
-          </div>
+            <Image src="/logo.png" alt="Vitanova Logo" width={240} height={240} />
+          
         </div>
         
-        {/* Main title */}
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-3 bg-gradient-to-r from-purple-400 via-pink-300 to-amber-400 bg-clip-text text-transparent">
-          Vitanova 2026
-        </h1>
         
         {/* Subtitle */}
         <p className="text-lg md:text-xl text-purple-300/80 font-medium mb-2">
@@ -36,8 +31,8 @@ export default function Header() {
         {/* Tagline */}
         <div className="max-w-2xl mx-auto">
           <p className="text-gray-300/70 text-sm md:text-base leading-relaxed italic">
-            &ldquo;Where two or three gather in my name, there am I with them.&rdquo;
-            <span className="block mt-1 text-gray-500 text-xs">— Matthew 18:20</span>
+            &ldquo;Come to me, all who are weary and burdened, and I will give you rest.&rdquo;
+            <span className="block mt-1 text-gray-500 text-xs">— Matthew 11:28-29</span>
           </p>
         </div>
         
