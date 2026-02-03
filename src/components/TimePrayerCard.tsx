@@ -28,7 +28,7 @@ export default function TimePrayerCard({
   }
 
   // Dynamic icon loading
-  const IconComponent = (Icons as Record<string, React.ComponentType<{ className?: string }>>)[prayer.icon_name] || Icons.Clock;
+  const IconComponent = ((Icons as unknown) as Record<string, React.ComponentType<{ className?: string }>>)[prayer.icon_name] || Icons.Clock;
 
   const handleSubmit = async (minutes: number) => {
     if (cooldownRemaining > 0 || isSubmitting) return;

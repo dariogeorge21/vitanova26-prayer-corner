@@ -27,7 +27,7 @@ export default function CountPrayerCard({
   }
 
   // Dynamic icon loading
-  const IconComponent = (Icons as Record<string, React.ComponentType<{ className?: string }>>)[prayer.icon_name] || Icons.Heart;
+  const IconComponent = (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[prayer.icon_name] || Icons.Heart;
 
   const handleSubmit = async () => {
     if (cooldownRemaining > 0 || isSubmitting) return;
