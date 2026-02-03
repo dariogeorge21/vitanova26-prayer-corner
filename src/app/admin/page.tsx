@@ -334,7 +334,7 @@ export default function AdminPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {prayers.map(prayer => {
-              const IconComponent = (Icons as Record<string, React.ComponentType<{ className?: string }>>)[prayer.icon_name] || Icons.Heart;
+              const IconComponent = (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[prayer.icon_name] || Icons.Heart;
               const adjustment = adjustments[prayer.id] || 0;
               const newTotal = prayer.total + adjustment;
 
