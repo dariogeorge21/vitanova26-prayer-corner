@@ -57,7 +57,7 @@ export default function Home() {
         >
           <p className="text-amber-200 text-xs font-medium flex items-center justify-center gap-2 uppercase tracking-widest">
             <ShieldCheck size={14} className="text-amber-500" />
-            Demo Mode: Local Persistence
+            Demo Mode: Local Data
           </p>
         </motion.div>
       )}
