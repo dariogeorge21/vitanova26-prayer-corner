@@ -7,6 +7,7 @@ import Header from '@/components/Header';
 import StatsBar from '@/components/StatsBar';
 import CountPrayerCard from '@/components/CountPrayerCard';
 import TimePrayerCard from '@/components/TimePrayerCard';
+import FastingChartCard from '@/components/FastingChartCard';
 import Footer from '@/components/Footer';
 import { usePrayers } from '@/hooks/usePrayers';
 import { useSubmitPrayer } from '@/hooks/useSubmitPrayer';
@@ -33,10 +34,11 @@ export default function Home() {
     onSuccess: updatePrayerLocally
   });
 
-  const { countPrayers, timePrayers } = useMemo(() => {
-    const countPrayers = prayers.filter(p => p.unit === 'count');
+  const { countPrayers, timePrayers, fastingMeals } = useMemo(() => {
+    const countPrayers = prayers.filter(p => p.unit === 'count' && ![10, 11, 12, 13].includes(p.id));
     const timePrayers = prayers.filter(p => p.unit === 'minutes');
-    return { countPrayers, timePrayers };
+    const fastingMeals = prayers.filter(p => [10, 11, 12, 13].includes(p.id));
+    return { countPrayers, timePrayers, fastingMeals };
   }, [prayers]);
 
   return (
@@ -146,6 +148,44 @@ export default function Home() {
                       />
                     </motion.div>
                   ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </section>
+
+          {/* --- SECTION: FASTING CHART --- */}
+          <section>
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-rose-400 font-semibold tracking-[0.2em] uppercase text-xs">
+                  <span>Sacrificial Journey</span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                  Fasting Tracker
+                </h2>
+              </div>
+              <p className="text-slate-400 max-w-md text-sm md:text-base font-light leading-relaxed">
+                Embrace self-denial through fasting. Track each meal skipped as an offering of your body and spirit.
+              </p>
+            </div>
+
+            <AnimatePresence mode="wait">
+              {isLoading ? (
+                <div className="h-[400px] rounded-[2rem] bg-white/[0.03] border border-white/5 animate-pulse" />
+              ) : (
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+                >
+                  {fastingMeals.length > 0 && (
+                    <FastingChartCard
+                      meals={fastingMeals}
+                      onSubmit={submitPrayer}
+                      cooldownRemaining={cooldownRemaining}
+                      isSubmitting={isSubmitting}
+                    />
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>

@@ -105,4 +105,20 @@ Amen.`,
       english: 'https://thiruvachanam.in/',
     },
   },
+  'Breakfast': {
+    type: 'text',
+    // No modal needed for fasting
+  },
+  'Lunch': {
+    type: 'text',
+    // No modal needed for fasting
+  },
+  'Tea & Snacks': {
+    type: 'text',
+    // No modal needed for fasting
+  },
+  'Dinner': {
+    type: 'text',
+    // No modal needed for fasting
+  },
 };
