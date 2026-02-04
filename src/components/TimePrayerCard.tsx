@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Clock, Loader2, Check } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { PrayerWithAggregate } from '@/lib/types';
+import PrayerModal from './PrayerModal';
+import { prayerContents } from '@/lib/prayerContent';
 
 interface TimePrayerCardProps {
   prayer: PrayerWithAggregate;
@@ -21,6 +23,7 @@ export default function TimePrayerCard({
   const [showSuccess, setShowSuccess] = useState(false);
   const [lastAdded, setLastAdded] = useState<number | null>(null);
   const [localTotal, setLocalTotal] = useState(prayer.total);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Update local total when prayer.total changes
   if (prayer.total !== localTotal && !showSuccess) {
@@ -29,6 +32,10 @@ export default function TimePrayerCard({
 
   // Dynamic icon loading
   const IconComponent = ((Icons as unknown) as Record<string, React.ComponentType<{ className?: string }>>)[prayer.icon_name] || Icons.Clock;
+
+  // Get prayer content for modal
+  const prayerContent = prayerContents[prayer.name];
+  const hasViewOption = prayerContent && (prayer.name === 'Adoration' || prayer.name === 'Word of God');
 
   const handleSubmit = async (minutes: number) => {
     if (cooldownRemaining > 0 || isSubmitting) return;
@@ -106,6 +113,16 @@ export default function TimePrayerCard({
         </div>
       )}
       
+      {/* View prayer link */}
+      {hasViewOption && (
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="w-full text-center text-sm text-amber-300 hover:text-amber-200 mb-3 transition-colors underline"
+        >
+          Visit
+        </button>
+      )}
+      
       {/* Time buttons */}
       <div className="grid grid-cols-2 gap-2">
         {timeButtons.map((btn) => (
@@ -133,6 +150,16 @@ export default function TimePrayerCard({
           </button>
         ))}
       </div>
+
+      {/* Prayer Modal */}
+      {hasViewOption && (
+        <PrayerModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title={prayer.name}
+          content={prayerContent}
+        />
+      )}
     </div>
   );
 }

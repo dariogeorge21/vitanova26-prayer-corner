@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Plus, Loader2, Check } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { PrayerWithAggregate } from '@/lib/types';
+import PrayerModal from './PrayerModal';
+import { prayerContents } from '@/lib/prayerContent';
 
 interface CountPrayerCardProps {
   prayer: PrayerWithAggregate;
@@ -20,6 +22,7 @@ export default function CountPrayerCard({
 }: CountPrayerCardProps) {
   const [showSuccess, setShowSuccess] = useState(false);
   const [localTotal, setLocalTotal] = useState(prayer.total);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Update local total when prayer.total changes
   if (prayer.total !== localTotal && !showSuccess) {
@@ -28,6 +31,10 @@ export default function CountPrayerCard({
 
   // Dynamic icon loading
   const IconComponent = (Icons as unknown as Record<string, React.ComponentType<{ className?: string }>>)[prayer.icon_name] || Icons.Heart;
+
+  // Get prayer content for modal
+  const prayerContent = prayerContents[prayer.name];
+  const hasViewOption = prayerContent && prayer.name !== 'Holy Mass';
 
   const handleSubmit = async () => {
     if (cooldownRemaining > 0 || isSubmitting) return;
@@ -75,6 +82,16 @@ export default function CountPrayerCard({
         <p className="text-sm text-gray-400 mt-1">prayers offered</p>
       </div>
       
+      {/* View prayer link */}
+      {hasViewOption && (
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="w-full text-center text-sm text-purple-300 hover:text-purple-200 mb-3 transition-colors underline"
+        >
+          Visit
+        </button>
+      )}
+      
       {/* Submit button */}
       <button
         onClick={handleSubmit}
@@ -108,6 +125,16 @@ export default function CountPrayerCard({
           </>
         )}
       </button>
+
+      {/* Prayer Modal */}
+      {hasViewOption && (
+        <PrayerModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title={prayer.name}
+          content={prayerContent}
+        />
+      )}
     </div>
   );
 }
