@@ -45,4 +45,4 @@ export const PRAYER_TYPES: PrayerType[] = [
   { id: 13, name: 'Dinner', unit: 'count', icon_name: 'Utensils', display_order: 13 },
 ];
 
-export const COOLDOWN_SECONDS = 5;
+export const COOLDOWN_SECONDS = 2;
