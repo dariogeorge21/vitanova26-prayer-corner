@@ -111,30 +111,36 @@ export default function AdminPage() {
           className="w-full max-w-md p-1 rounded-[2.5rem] bg-gradient-to-b from-purple-500/20 to-transparent shadow-2xl"
         >
           <div className="bg-slate-900/90 backdrop-blur-xl p-10 rounded-[2.3rem] border border-white/5">
-            <div className="text-center space-y-4 mb-8">
-              <div className="w-20 h-20 bg-purple-500/10 rounded-3xl border border-purple-500/20 flex items-center justify-center mx-auto shadow-inner">
-                <ShieldAlert className="w-10 h-10 text-purple-400" />
-              </div>
-              <h1 className="text-2xl font-bold tracking-tight text-white">Vitanova Command</h1>
-              <p className="text-slate-500 text-sm">Authentication required to manage repository</p>
-            </div>
+        <div className="text-center space-y-4 mb-8">
+          <div className="w-20 h-20 bg-purple-500/10 rounded-3xl border border-purple-500/20 flex items-center justify-center mx-auto shadow-inner">
+            <ShieldAlert className="w-10 h-10 text-purple-400" />
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-white">Vitanova Command</h1>
+          <p className="text-slate-500 text-sm">Authentication required to manage repository</p>
+        </div>
 
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="relative group">
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Admin Token"
-                  className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                />
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-purple-400 transition-colors" size={20} />
-              </div>
-              {passwordError && <p className="text-red-400 text-xs text-center font-medium">{passwordError}</p>}
-              <button type="submit" className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold tracking-widest uppercase text-xs transition-all shadow-lg shadow-purple-500/20">
-                Authorize Access
-              </button>
-            </form>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div className="relative group">
+            <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Admin Token"
+          className="w-full pl-12 pr-4 py-4 rounded-2xl bg-white/5 border border-white/10 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
+            />
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-purple-400 transition-colors" size={20} />
+          </div>
+          {passwordError && <p className="text-red-400 text-xs text-center font-medium">{passwordError}</p>}
+          <button type="submit" className="w-full py-4 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold tracking-widest uppercase text-xs transition-all shadow-lg shadow-purple-500/20">
+            Authorize Access
+          </button>
+        </form>
+
+        <div className="mt-6 text-center">
+          <Link href="/" className="text-purple-400 hover:text-purple-300 text-sm font-medium transition-colors">
+            Back to Home
+          </Link>
+        </div>
           </div>
         </motion.div>
       </div>
