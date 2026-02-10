@@ -11,7 +11,7 @@ A reverent, dark-themed web application to aggregate intercessory prayers for **
 
 ## ✨ Features
 
-- **🙏 9 Prayer Types** - Holy Mass, Rosary, Adoration, Word of God, Memorare, Creed, Hail Mary, Way of the Cross, Novena of St. Joseph
+- **🙏 10 Prayer Types** - Holy Mass, Rosary, Adoration, Word of God, Memorare, Creed, Hail Mary, Way of the Cross, Novena of St. Joseph, Prayer to St. Michael
 - **⏱️ Time-based Prayers** - +5min and +30min increments for Adoration and Word of God
 - **📊 Live Statistics** - Real-time aggregate counters with beautiful visualizations
 - **🔒 Spam Protection** - 5-second cooldown between submissions per device

@@ -44,7 +44,7 @@ FROM prayer_logs
 GROUP BY prayer_type_id;
 
 -- 6. Seed the prayer types data
--- Insert the 9 prayer types for Vitanova 2026 + 4 fasting meal types
+-- Insert the 10 prayer types for Vitanova 2026 + 4 fasting meal types
 INSERT INTO prayer_types (id, name, unit, icon_name, display_order) VALUES
   (1, 'Holy Mass', 'count', 'Church', 1),
   (2, 'Rosary', 'count', 'CircleDot', 2),
@@ -58,7 +58,8 @@ INSERT INTO prayer_types (id, name, unit, icon_name, display_order) VALUES
   (10, 'Breakfast', 'count', 'Coffee', 10),
   (11, 'Lunch', 'count', 'UtensilsCrossed', 11),
   (12, 'Tea & Snacks', 'count', 'Cake', 12),
-  (13, 'Dinner', 'count', 'Utensils', 13)
+  (13, 'Dinner', 'count', 'Utensils', 13),
+  (14, 'Prayer to St. Michael', 'count', 'ShieldCheck', 14)
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
   unit = EXCLUDED.unit,

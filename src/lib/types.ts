@@ -43,6 +43,7 @@ export const PRAYER_TYPES: PrayerType[] = [
   { id: 11, name: 'Lunch', unit: 'count', icon_name: 'UtensilsCrossed', display_order: 11 },
   { id: 12, name: 'Tea & Snacks', unit: 'count', icon_name: 'Cake', display_order: 12 },
   { id: 13, name: 'Dinner', unit: 'count', icon_name: 'Utensils', display_order: 13 },
+  { id: 14, name: 'Prayer to St. Michael', unit: 'count', icon_name: 'ShieldCheck', display_order: 14 },
 ];
 
 export const COOLDOWN_SECONDS = 2;
