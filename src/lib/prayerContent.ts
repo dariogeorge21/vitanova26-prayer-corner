@@ -87,6 +87,13 @@ Amen.`,
       malayalam: 'https://malankaralibrary.com/ImageUpload/051a1217ed02130829cd34181e87b98f.pdf',
     },
   },
+  'Karuna Kontha (Rosary of Mercy)': {
+    type: 'modal-links',
+    links: {
+      malayalam: 'https://malayalamnovena.wordpress.com/2014/03/06/rosary-of-divine-mercy/',
+      english: 'https://www.usccb.org/prayers/chaplet-divine-mercy',
+    },
+  },
   'Novena of St. Joseph': {
     type: 'links',
     links: {

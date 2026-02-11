@@ -38,12 +38,13 @@ export const PRAYER_TYPES: PrayerType[] = [
   { id: 6, name: 'Creed', unit: 'count', icon_name: 'Shield', display_order: 6 },
   { id: 7, name: 'Hail Mary', unit: 'count', icon_name: 'Star', display_order: 7 },
   { id: 8, name: 'Way of the Cross', unit: 'count', icon_name: 'Cross', display_order: 8 },
-  { id: 9, name: 'Novena of St. Joseph', unit: 'count', icon_name: 'Flower2', display_order: 9 },
-  { id: 10, name: 'Breakfast', unit: 'count', icon_name: 'Coffee', display_order: 10 },
-  { id: 11, name: 'Lunch', unit: 'count', icon_name: 'UtensilsCrossed', display_order: 11 },
-  { id: 12, name: 'Tea & Snacks', unit: 'count', icon_name: 'Cake', display_order: 12 },
-  { id: 13, name: 'Dinner', unit: 'count', icon_name: 'Utensils', display_order: 13 },
-  { id: 14, name: 'Prayer to St. Michael', unit: 'count', icon_name: 'ShieldCheck', display_order: 14 },
+  { id: 9, name: 'Karuna Kontha (Rosary of Mercy)', unit: 'count', icon_name: 'HeartHandshake', display_order: 9 },
+  { id: 10, name: 'Novena of St. Joseph', unit: 'count', icon_name: 'Flower2', display_order: 10 },
+  { id: 11, name: 'Breakfast', unit: 'count', icon_name: 'Coffee', display_order: 11 },
+  { id: 12, name: 'Lunch', unit: 'count', icon_name: 'UtensilsCrossed', display_order: 12 },
+  { id: 13, name: 'Tea & Snacks', unit: 'count', icon_name: 'Cake', display_order: 13 },
+  { id: 14, name: 'Dinner', unit: 'count', icon_name: 'Utensils', display_order: 14 },
+  { id: 15, name: 'Prayer to St. Michael', unit: 'count', icon_name: 'ShieldCheck', display_order: 15 },
 ];
 
 export const COOLDOWN_SECONDS = 2;

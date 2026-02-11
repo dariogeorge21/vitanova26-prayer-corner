@@ -54,12 +54,13 @@ INSERT INTO prayer_types (id, name, unit, icon_name, display_order) VALUES
   (6, 'Creed', 'count', 'Shield', 6),
   (7, 'Hail Mary', 'count', 'Star', 7),
   (8, 'Way of the Cross', 'count', 'Cross', 8),
-  (9, 'Novena of St. Joseph', 'count', 'Flower2', 9),
-  (10, 'Breakfast', 'count', 'Coffee', 10),
-  (11, 'Lunch', 'count', 'UtensilsCrossed', 11),
-  (12, 'Tea & Snacks', 'count', 'Cake', 12),
-  (13, 'Dinner', 'count', 'Utensils', 13),
-  (14, 'Prayer to St. Michael', 'count', 'ShieldCheck', 14)
+  (9, 'Karuna Kontha (Rosary of Mercy)', 'count', 'HeartHandshake', 9),
+  (10, 'Novena of St. Joseph', 'count', 'Flower2', 10),
+  (11, 'Breakfast', 'count', 'Coffee', 11),
+  (12, 'Lunch', 'count', 'UtensilsCrossed', 12),
+  (13, 'Tea & Snacks', 'count', 'Cake', 13),
+  (14, 'Dinner', 'count', 'Utensils', 14),
+  (15, 'Prayer to St. Michael', 'count', 'ShieldCheck', 15)
 ON CONFLICT (id) DO UPDATE SET
   name = EXCLUDED.name,
   unit = EXCLUDED.unit,
