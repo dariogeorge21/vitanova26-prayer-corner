@@ -88,7 +88,7 @@ export default function CountPrayerCard({
           onClick={() => setIsModalOpen(true)}
           className="w-full text-center text-sm text-purple-300 hover:text-purple-200 mb-3 transition-colors underline"
         >
-          Visit
+          View Prayer
         </button>
       )}
       
