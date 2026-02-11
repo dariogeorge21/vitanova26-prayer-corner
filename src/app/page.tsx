@@ -35,9 +35,9 @@ export default function Home() {
   });
 
   const { countPrayers, timePrayers, fastingMeals } = useMemo(() => {
-    const countPrayers = prayers.filter(p => p.unit === 'count' && ![10, 11, 12, 13].includes(p.id));
+    const countPrayers = prayers.filter(p => p.unit === 'count' && ![11, 12, 13, 14].includes(p.id));
     const timePrayers = prayers.filter(p => p.unit === 'minutes');
-    const fastingMeals = prayers.filter(p => [10, 11, 12, 13].includes(p.id));
+    const fastingMeals = prayers.filter(p => [11, 12, 13, 14].includes(p.id));
     return { countPrayers, timePrayers, fastingMeals };
   }, [prayers]);
 
